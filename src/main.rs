@@ -15,14 +15,14 @@ fn main() {
     let source_file_path = &args[0];
     let source_file = SourceFile::new(source_file_path);
 
-    let mut scanner = Scanner::new(source_file);
-    let tokens = scanner.scan_all();
+    let mut scanner = Scanner::new(source_file.chars);
+    scanner.scan_all();
 
-    for token in &tokens {
-        println!("{:#?}", token);
+    for token in &scanner.tokens {
+        println!("{:?}", token);
     }
 
-    let mut parser = Parser::new(tokens);
+    let mut parser = Parser::new(scanner.tokens);
     let mut ast = parser.parse();
     println!("{:#?}", ast);
 

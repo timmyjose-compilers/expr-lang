@@ -32,15 +32,18 @@ UnaryExpr <- UNARYPLUS_op UnaryExpr
             / LOGICALNOT_op UnaryExpr
             / LPAREN Expr RPAREN
             / PrintExpr
-            / VnameExpr
-            / IntegerExpr
+            / Identifier
+            / IntegerLiteral
+            / BoolLiteral
 
 PrintExpr <- PRINT_keyword LPAREN Expr RPAREN
-VnameExpr <- Identifier
-IntegerExpr <- IntegerLiteral
 
 Identifier <- [a-zA-Z_][a-zA-Z_0-9]* Whitespace
 IntegerLiteral <- [0-9]+ Whitespace
+BoolLiteral <- FALSE_const / TRUE_const
+
+FALSE_const <- 'false' Whitespace
+TRUE_const <- 'true' Whitespace
 
 ASSIGN_op <- ('=' / '+=' / '-=' / '*=' / '/=' / '%=' / '&=' / '|=' / '^=' / '<<=' / '>>=') Whitespace
 LOGICALOR_op <- '||' Whitespace
