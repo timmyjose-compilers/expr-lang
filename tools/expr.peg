@@ -4,6 +4,7 @@
 #   $ make clean && make && ./check_parser.sh to verify all files in the examples folder
 #
 #   $ make clean && make && ./check_parser.sh <file-name> to check a paritcular file.
+#
 
 CompilationUnit <- Whitespace Expr* Eof
 
