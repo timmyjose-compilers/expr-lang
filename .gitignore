@@ -1,0 +1,4 @@
+/target
+**/*.o
+tools/parser.c
+tools/expr

@@ -1,0 +1,66 @@
+# A simple languaAge for experimenting with ASTs in Rust
+# 
+# Usage:
+#   $ make clean && make && ./check_parser.sh to verify all files in the examples folder
+#
+#   $ make clean && make && ./check_parser.sh <file-name> to check a paritcular file.
+
+CompilationUnit <- Whitespace Expr* Eof
+
+Expr <- AssignExpr
+
+AssignExpr <- LogicalOrExpr (ASSIGN_op LogicalOrExpr)*
+
+LogicalOrExpr <- LogicalAndExpr (LOGICALOR_op LogicalAndExpr)*
+
+LogicalAndExpr <- RelationalExpr (LOGICALAND_op RelationalExpr)*
+
+RelationalExpr <- BitExpr (RELATIONAL_op BitExpr)*
+
+BitExpr <- BitShiftExpr (BIT_op BitShiftExpr)*
+
+BitShiftExpr <- AdditiveExpr (BITSHIFT_op AdditiveExpr)*
+
+AdditiveExpr <- MultiplicativeExpr (ADDITIVE_op MultiplicativeExpr)*
+
+MultiplicativeExpr <- UnaryExpr (MULTIPLICATIVE_op MultiplicativeExpr)*
+
+UnaryExpr <- UNARYPLUS_op UnaryExpr
+            / UNARYMINUS_opUnaryExpr
+            / BITWISENOT_op UnaryExpr
+            / LOGICALNOT_op UnaryExpr
+            / LPAREN Expr RPAREN
+            / PrintExpr
+            / VnameExpr
+            / IntegerExpr
+
+PrintExpr <- PRINT_keyword LPAREN Expr RPAREN
+VnameExpr <- Identifier
+IntegerExpr <- IntegerLiteral
+
+Identifier <- [a-zA-Z_][a-zA-Z_0-9]* Whitespace
+IntegerLiteral <- [0-9]+ Whitespace
+
+ASSIGN_op <- ('=' / '+=' / '-=' / '*=' / '/=' / '%=' / '&=' / '|=' / '^=' / '<<=' / '>>=') Whitespace
+LOGICALOR_op <- '||' Whitespace
+LOGICALAND_op <- '&&' Whitespace
+RELATIONAL_op <- ('<=' / '<' / '>=' / '>' / '==' / '!=') Whitespace
+BIT_op <- ('&' / '|' / '^') Whitespace
+BITSHIFT_op <- ('<<' / '>>') Whitespace
+ADDITIVE_op <- ('+' / '-') Whitespace
+MULTIPLICATIVE_op <- ('*' / '/' / '%') Whitespace
+BITWISENOT_op <- '~' Whitespace
+LOGICALNOT_op <- '!' Whitespace
+
+UNARYPLUS_op <- '+' Whitespace
+UNARYMINUS_opUnaryExpr <- '-' Whitespace
+
+PRINT_keyword <- 'print' Whitespace
+
+LPAREN <- '(' Whitespace
+RPAREN <- ')' Whitespace
+
+comment <- '//' ([^\n])*
+Whitespace <- ([ \t\n] / comment)*
+
+Eof <- !.
