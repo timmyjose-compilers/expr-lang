@@ -24,27 +24,10 @@ impl Parser {
         &self.tokens[self.curr_idx]
     }
 
-    fn advance_if(&mut self, expected_kind: TokenKind) {
-        if self.curr_token().kind != expected_kind {
-            report_error(
-                ExprError::new(
-                    ExprErrorKind::ParserError,
-                    format!(
-                        "expected token {:?}, but found token {:?}",
-                        expected_kind,
-                        self.curr_token().kind
-                    ),
-                ),
-                Some(&self.curr_token().loc),
-            );
-        } else {
-            self.curr_idx += 1;
-        }
-    }
-
     fn advance(&mut self) {
         self.curr_idx += 1;
     }
+
     fn lbp(kind: TokenKind) -> i32 {
         match kind {
             TokenKind::Assign
@@ -127,10 +110,20 @@ impl Parser {
             _ => unreachable!(),
         };
 
-        Expr::BinaryExpr {
-            lhs: Box::new(lhs),
-            op,
-            rhs: Box::new(rhs),
+        match kind {
+            TokenKind::Assign
+            | TokenKind::PlusAssign
+            | TokenKind::MinusAssign
+            | TokenKind::StarAssign
+            | TokenKind::SlashAssign
+            | TokenKind::ModAssign
+            | TokenKind::LeftShiftAssign
+            | TokenKind::RightShiftAssign
+            | TokenKind::BitwiseOrAssign
+            | TokenKind::BitwiseXorAssign => {
+                Expr::AssignExpr(AssignExpr::new(Box::new(lhs), op, Box::new(rhs)))
+            }
+            _ => Expr::BinaryExpr(BinaryExpr::new(Box::new(lhs), op, Box::new(rhs))),
         }
     }
 
@@ -152,15 +145,15 @@ impl Parser {
                 expr
             }
 
-            TokenKind::Plus => Expr::UnaryExpr {
-                op: UnaryOperator::UnaryPlus,
-                elem: Box::new(self.parse_expression(Parser::MAX_BINDING_POWER)),
-            },
+            TokenKind::Plus => Expr::UnaryExpr(UnaryExpr::new(
+                UnaryOperator::UnaryPlus,
+                Box::new(self.parse_expression(Parser::MAX_BINDING_POWER)),
+            )),
 
-            TokenKind::Minus => Expr::UnaryExpr {
-                op: UnaryOperator::UnaryMinus,
-                elem: Box::new(self.parse_expression(Parser::MIN_BINDING_POWER)),
-            },
+            TokenKind::Minus => Expr::UnaryExpr(UnaryExpr::new(
+                UnaryOperator::UnaryMinus,
+                Box::new(self.parse_expression(Parser::MIN_BINDING_POWER)),
+            )),
 
             TokenKind::Print => {
                 Expr::PrintExpr(Box::new(self.parse_expression(Parser::MIN_BINDING_POWER)))
@@ -172,7 +165,7 @@ impl Parser {
                 Expr::BoolExpr(token.spelling.parse::<bool>().unwrap())
             }
 
-            TokenKind::Identifier => Expr::VnameExpr(token.spelling.clone()),
+            TokenKind::Identifier => Expr::VnameExpr(Identifier::new(token.spelling.clone())),
 
             _ => {
                 eprintln!(

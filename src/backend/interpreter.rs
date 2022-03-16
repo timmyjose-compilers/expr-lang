@@ -7,7 +7,7 @@ impl Interpreter {
         Interpreter
     }
 
-    pub fn interpret(&mut self, ast: SharedPtr<Ast>) {
+    pub fn interpret(&mut self, _ast: SharedPtr<Ast>) {
         todo!()
     }
 }
