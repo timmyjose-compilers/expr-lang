@@ -1,4 +1,4 @@
-use crate::front::ast::Ast;
+use crate::front::ast::*;
 
 pub struct Checker;
 
@@ -7,5 +7,5 @@ impl Checker {
         Checker
     }
 
-    pub fn check(&mut self, ast: &mut Ast) {}
+    pub fn check(&mut self, ast: SharedPtr<Ast>) {}
 }

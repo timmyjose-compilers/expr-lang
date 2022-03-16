@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 pub const NUL: char = '\u{0}';
 
-#[derive(Debug, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Location {
     pub source_file: PathBuf,
     pub line: usize,
@@ -100,16 +100,5 @@ impl SourceFile {
             .collect::<Vec<Char>>();
 
         Ok(chars)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::SourceFile;
-
-    #[test]
-    fn it_works() {
-        let sf = SourceFile::new("examples/1.expr");
-        sf.chars.iter().for_each(|c| println!("{:?}", c));
     }
 }

@@ -30,6 +30,10 @@ UnaryExpr <- UNARYPLUS_op UnaryExpr
             / UNARYMINUS_opUnaryExpr
             / BITWISENOT_op UnaryExpr
             / LOGICALNOT_op UnaryExpr
+            / PREFIXINC_op UnaryExpr
+            / PREFIXDEC_op UnaryExpr
+            / POSTFIXINC_op UnaryExpr
+            / POSTFIXDEC_op UnaryExpr
             / LPAREN Expr RPAREN
             / PrintExpr
             / Identifier
@@ -37,7 +41,6 @@ UnaryExpr <- UNARYPLUS_op UnaryExpr
             / BoolLiteral
 
 PrintExpr <- PRINT_keyword LPAREN Expr RPAREN
-
 Identifier <- [a-zA-Z_][a-zA-Z_0-9]* Whitespace
 IntegerLiteral <- [0-9]+ Whitespace
 BoolLiteral <- FALSE_const / TRUE_const
@@ -55,6 +58,10 @@ ADDITIVE_op <- ('+' / '-') Whitespace
 MULTIPLICATIVE_op <- ('*' / '/' / '%') Whitespace
 BITWISENOT_op <- '~' Whitespace
 LOGICALNOT_op <- '!' Whitespace
+PREFIXINC_op <- '++' Whitespace
+PREFIXDEC_op <- '--' Whitespace
+POSTFIXINC_op <- '++' Whitespace
+POSTFIXDEC_op <- '--' Whitespace
 
 UNARYPLUS_op <- '+' Whitespace
 UNARYMINUS_opUnaryExpr <- '-' Whitespace

@@ -1,0 +1,2 @@
+a = true
+print(false || (false && true) || a)

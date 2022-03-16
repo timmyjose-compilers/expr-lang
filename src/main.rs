@@ -1,6 +1,7 @@
 use expr_lang::backend::interpreter::Interpreter;
 use expr_lang::front::{parser::Parser, scanner::Scanner, source_file::SourceFile};
 use expr_lang::middle::checker::Checker;
+use std::rc::Rc;
 
 use std::env;
 
@@ -23,15 +24,15 @@ fn main() {
     }
 
     let mut parser = Parser::new(scanner.tokens);
-    let mut ast = parser.parse();
+    let ast = parser.parse();
     println!("{:#?}", ast);
 
     let mut checker = Checker::new();
-    checker.check(&mut ast);
-    println!("{:#?}", ast);
+    checker.check(Rc::clone(&ast));
+    //println!("{:#?}", ast);
 
     let mut interpreter = Interpreter::new();
-    interpreter.interpret(&ast);
+    //interpreter.interpret(ast);
 }
 
 fn usage() {

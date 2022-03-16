@@ -1,6 +1,6 @@
 use super::source_file::Location;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum TokenKind {
     Assign,
     BitwiseAnd,
@@ -19,7 +19,7 @@ pub enum TokenKind {
     Integer,
     LeftParen,
     LeftShift,
-    LeftShitAssign,
+    LeftShiftAssign,
     LessThan,
     LessThanOrEqual,
     LogicalAnd,
@@ -43,7 +43,7 @@ pub enum TokenKind {
     True,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Token {
     pub kind: TokenKind,
     pub spelling: String,

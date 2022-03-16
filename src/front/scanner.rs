@@ -204,7 +204,12 @@ impl Scanner {
                 self.eat_it();
                 if self.curr_char().c == '<' {
                     self.eat_it();
-                    TokenKind::LeftShift
+                    if self.curr_char().c == '=' {
+                        self.eat_it();
+                        TokenKind::LeftShiftAssign
+                    } else {
+                        TokenKind::LeftShift
+                    }
                 } else if self.curr_char().c == '=' {
                     self.eat_it();
                     TokenKind::LessThanOrEqual
@@ -217,7 +222,12 @@ impl Scanner {
                 self.eat_it();
                 if self.curr_char().c == '>' {
                     self.eat_it();
-                    TokenKind::RightShift
+                    if self.curr_char().c == '=' {
+                        self.eat_it();
+                        TokenKind::RightShiftAssign
+                    } else {
+                        TokenKind::RightShift
+                    }
                 } else if self.curr_char().c == '=' {
                     self.eat_it();
                     TokenKind::GreaterThanOrEqual
@@ -276,32 +286,6 @@ impl Scanner {
             if is_eof {
                 break;
             }
-        }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::Scanner;
-    use crate::front::source_file::SourceFile;
-
-    #[test]
-    fn basic_test() {
-        let mut scanner = Scanner::new(SourceFile::new("examples/1.expr").chars);
-        scanner.scan_all();
-
-        for token in scanner.tokens {
-            println!("{:?}", token);
-        }
-    }
-
-    #[test]
-    fn empty_test() {
-        let mut scanner = Scanner::new(SourceFile::new("examples/1.expr").chars);
-        scanner.scan_all();
-
-        for token in scanner.tokens {
-            println!("{:?}", token);
         }
     }
 }

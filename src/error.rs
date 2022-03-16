@@ -16,7 +16,7 @@ impl ExprError {
     }
 }
 
-pub fn report_error(err: ExprError, loc: Option<Location>) {
+pub fn report_error(err: ExprError, loc: Option<&Location>) {
     if let Some(loc) = loc {
         eprintln!(
             "[{:?}] line: {}, col: {} - {}",
