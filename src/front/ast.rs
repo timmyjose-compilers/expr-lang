@@ -22,8 +22,22 @@ pub enum Expr {
     IntegerExpr(i32),
     PrintExpr(Box<Expr>),
     UnaryExpr(UnaryExpr),
-    VnameExpr(Identifier),
+    VnameExpr(VnameExpr),
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct VnameExpr {
+    pub id: Identifier,
+    pub typ: Option<Type>,
+}
+
+impl VnameExpr {
+    pub fn new(id: Identifier) -> Self {
+        VnameExpr { id, typ: None }
+    }
+}
+
+impl VnameExpr {}
 
 #[derive(Debug)]
 pub struct AssignExpr {

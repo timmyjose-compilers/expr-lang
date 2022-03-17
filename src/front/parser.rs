@@ -165,7 +165,9 @@ impl Parser {
                 Expr::BoolExpr(token.spelling.parse::<bool>().unwrap())
             }
 
-            TokenKind::Identifier => Expr::VnameExpr(Identifier::new(token.spelling.clone())),
+            TokenKind::Identifier => {
+                Expr::VnameExpr(VnameExpr::new(Identifier::new(token.spelling.clone())))
+            }
 
             _ => {
                 eprintln!(

@@ -113,8 +113,9 @@ impl VisitorMut for Checker {
 
     /// Type-check vname expr;
     /// - simply visit the identifier and return its type.
-    fn visit_vname_expr(&mut self, id: &mut Identifier) -> Self::Result {
-        self.visit_identifier(id)
+    fn visit_vname_expr(&mut self, vname_expr: &mut VnameExpr) -> Self::Result {
+        vname_expr.typ = self.visit_identifier(&mut vname_expr.id);
+        vname_expr.typ.clone()
     }
 
     /// Type-check integer expr:
@@ -207,18 +208,19 @@ impl VisitorMut for Checker {
         if let DeclOrId::Decl(Decl::OperatorDecl(OperatorDecl::BinaryOperatorDecl(ref _op_decl))) =
             op_spec
         {
-            if let Expr::VnameExpr(ref mut id) = *ass_expr.vname {
-                if id.typ.is_none() {
-                    id.typ = rhs_typ.clone();
+            if let Expr::VnameExpr(ref mut vname) = *ass_expr.vname {
+                if vname.typ.is_none() {
+                    vname.typ = rhs_typ.clone();
+                    vname.id.typ = rhs_typ.clone();
                     self.id_table
-                        .save_attr(&id.spelling, DeclOrId::Id(id.clone()));
+                        .save_attr(&vname.id.spelling, DeclOrId::Id(vname.id.clone()));
                 } else if lhs_typ != rhs_typ {
                     report_error(
                         ExprError::new(
                             ExprErrorKind::CheckerError,
                             format!(
                                 "id {:?} has inferred type {:?}, but rhs has type {:?}",
-                                id.spelling, id.typ, rhs_typ
+                                vname.id.spelling, vname.id.typ, rhs_typ
                             ),
                         ),
                         None,
@@ -251,6 +253,7 @@ impl VisitorMut for Checker {
     fn visit_binary_expr(&mut self, bin_expr: &mut BinaryExpr) -> Self::Result {
         let lhs_typ = self.visit_expr(&mut bin_expr.lhs);
         if lhs_typ.is_none() {
+            println!("{:?}", bin_expr.lhs);
             report_error(
                 ExprError::new(
                     ExprErrorKind::CheckerError,
@@ -260,9 +263,8 @@ impl VisitorMut for Checker {
             );
         }
 
-        let lhs_typ = lhs_typ.unwrap();
-
         let rhs_typ = self.visit_expr(&mut bin_expr.rhs);
+
         if rhs_typ.is_none() {
             report_error(
                 ExprError::new(
@@ -273,6 +275,7 @@ impl VisitorMut for Checker {
             );
         }
 
+        let lhs_typ = lhs_typ.unwrap();
         let rhs_typ = rhs_typ.unwrap();
         let op_spec = self.get_bin_op_spec(&bin_expr.op);
 

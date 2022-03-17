@@ -1,4 +1,6 @@
 a = 1 + 2 * 3 // 7
+print(a)
 b = 10 // 10
+print(b)
 c = a % b // 7
 print(a + b + c) // 24

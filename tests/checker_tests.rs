@@ -9,7 +9,7 @@ use expr_lang::front::{parser::Parser, scanner::Scanner, source_file::SourceFile
 use expr_lang::middle::checker::Checker;
 
 #[test]
-fn all_cheker_tests() -> io::Result<()> {
+fn all_checker_tests() -> io::Result<()> {
     let mut test_files = Vec::new();
     common::get_all_test_files(&"examples", &mut test_files)?;
 

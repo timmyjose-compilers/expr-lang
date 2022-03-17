@@ -1,3 +1,4 @@
+use expr_lang::backend::interpreter::Interpreter;
 use expr_lang::front::{parser::Parser, scanner::Scanner, source_file::SourceFile};
 use expr_lang::middle::checker::Checker;
 use std::rc::Rc;
@@ -30,8 +31,8 @@ fn main() {
     checker.check(Rc::clone(&ast));
     println!("{:#?}", ast);
 
-    //let mut interpreter = Interpreter::new();
-    //interpreter.interpret(ast);
+    let mut interpreter = Interpreter::new();
+    interpreter.interpret(Rc::clone(&ast));
 }
 
 fn usage() {
