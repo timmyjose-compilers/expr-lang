@@ -40,8 +40,11 @@ UnaryExpr <- UNARYPLUS_op UnaryExpr
             / IntegerLiteral
             / BoolLiteral
 
+
 PrintExpr <- PRINT_keyword LPAREN Expr RPAREN
+
 Identifier <- [a-zA-Z_][a-zA-Z_0-9]* Whitespace
+
 IntegerLiteral <- [0-9]+ Whitespace
 BoolLiteral <- FALSE_const / TRUE_const
 

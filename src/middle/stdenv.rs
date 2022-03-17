@@ -1,6 +1,6 @@
 // The standard environment for expr-lang.
 
-use super::id_table::IdentificationTable;
+use super::id_table::{DeclOrId, IdentificationTable};
 use crate::front::ast::*;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -302,70 +302,135 @@ lazy_static! {
 
 /// Loads the standard environment at level 0.
 pub fn load_stdenv(id_table: &mut IdentificationTable) {
-    id_table.save_attr("bitwise_not", STDENV.get("bitwise_not").unwrap());
-    id_table.save_attr("logical_not", STDENV.get("logical_not").unwrap());
+    id_table.save_attr(
+        "bitwise_not",
+        DeclOrId::Decl(STDENV.get("bitwise_not").unwrap().clone()),
+    );
+    id_table.save_attr(
+        "logical_not",
+        DeclOrId::Decl(STDENV.get("logical_not").unwrap().clone()),
+    );
 
-    id_table.save_attr("unary_plus", STDENV.get("unary_plus").unwrap());
+    id_table.save_attr(
+        "unary_plus",
+        DeclOrId::Decl(STDENV.get("unary_plus").unwrap().clone()),
+    );
 
-    id_table.save_attr("unary_minus", STDENV.get("unary_minus").unwrap());
+    id_table.save_attr(
+        "unary_minus",
+        DeclOrId::Decl(STDENV.get("unary_minus").unwrap().clone()),
+    );
 
-    id_table.save_attr("add", STDENV.get("add").unwrap());
-    id_table.save_attr("add_assign", STDENV.get("add_assign").unwrap());
-    id_table.save_attr("bitwise_and", STDENV.get("bitwise_and").unwrap());
+    id_table.save_attr(
+        "assign",
+        DeclOrId::Decl(STDENV.get("assign").unwrap().clone()),
+    );
+
+    id_table.save_attr("add", DeclOrId::Decl(STDENV.get("add").unwrap().clone()));
+    id_table.save_attr(
+        "add_assign",
+        DeclOrId::Decl(STDENV.get("add_assign").unwrap().clone()),
+    );
+    id_table.save_attr(
+        "bitwise_and",
+        DeclOrId::Decl(STDENV.get("bitwise_and").unwrap().clone()),
+    );
 
     id_table.save_attr(
         "bitwise_and_assign",
-        STDENV.get("bitwise_and_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("bitwise_and_assign").unwrap().clone()),
     );
 
-    id_table.save_attr("bitwise_or", STDENV.get("bitwise_or").unwrap());
+    id_table.save_attr(
+        "bitwise_or",
+        DeclOrId::Decl(STDENV.get("bitwise_or").unwrap().clone()),
+    );
     id_table.save_attr(
         "bitwise_or_assign",
-        STDENV.get("bitwise_or_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("bitwise_or_assign").unwrap().clone()),
     );
-    id_table.save_attr("bitwise_xor", STDENV.get("bitwise_xor").unwrap());
+    id_table.save_attr(
+        "bitwise_xor",
+        DeclOrId::Decl(STDENV.get("bitwise_xor").unwrap().clone()),
+    );
     id_table.save_attr(
         "bitwise_xor_assign",
-        STDENV.get("bitwise_xor_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("bitwise_xor_assign").unwrap().clone()),
     );
-    id_table.save_attr("div", STDENV.get("div").unwrap());
-    id_table.save_attr("div_assign", STDENV.get("div_assign").unwrap());
-    id_table.save_attr("equal", STDENV.get("equal").unwrap());
-    id_table.save_attr("greater_than", STDENV.get("greater_than").unwrap());
+    id_table.save_attr("div", DeclOrId::Decl(STDENV.get("div").unwrap().clone()));
+    id_table.save_attr(
+        "div_assign",
+        DeclOrId::Decl(STDENV.get("div_assign").unwrap().clone()),
+    );
+    id_table.save_attr(
+        "equal",
+        DeclOrId::Decl(STDENV.get("equal").unwrap().clone()),
+    );
+    id_table.save_attr(
+        "greater_than",
+        DeclOrId::Decl(STDENV.get("greater_than").unwrap().clone()),
+    );
     id_table.save_attr(
         "greater_than_or_equal",
-        STDENV.get("greater_than_or_equal").unwrap(),
+        DeclOrId::Decl(STDENV.get("greater_than_or_equal").unwrap().clone()),
     );
-    id_table.save_attr("left_shift", STDENV.get("left_shift").unwrap());
+    id_table.save_attr(
+        "left_shift",
+        DeclOrId::Decl(STDENV.get("left_shift").unwrap().clone()),
+    );
     id_table.save_attr(
         "left_shift_assign",
-        STDENV.get("left_shift_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("left_shift_assign").unwrap().clone()),
     );
-    id_table.save_attr("less_than", STDENV.get("less_than").unwrap());
+    id_table.save_attr(
+        "less_than",
+        DeclOrId::Decl(STDENV.get("less_than").unwrap().clone()),
+    );
     id_table.save_attr(
         "less_than_or_equal",
-        STDENV.get("less_than_or_equal").unwrap(),
+        DeclOrId::Decl(STDENV.get("less_than_or_equal").unwrap().clone()),
     );
-    id_table.save_attr("logical_and", STDENV.get("logical_and").unwrap());
+    id_table.save_attr(
+        "logical_and",
+        DeclOrId::Decl(STDENV.get("logical_and").unwrap().clone()),
+    );
     id_table.save_attr(
         "logical_and_assign",
-        STDENV.get("logical_and_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("logical_and_assign").unwrap().clone()),
     );
-    id_table.save_attr("logical_or", STDENV.get("logical_or").unwrap());
+    id_table.save_attr(
+        "logical_or",
+        DeclOrId::Decl(STDENV.get("logical_or").unwrap().clone()),
+    );
     id_table.save_attr(
         "logical_or_assign",
-        STDENV.get("logical_or_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("logical_or_assign").unwrap().clone()),
     );
-    id_table.save_attr("mod", STDENV.get("mod").unwrap());
-    id_table.save_attr("mod_assign", STDENV.get("mod_assign").unwrap());
-    id_table.save_attr("mul", STDENV.get("mul").unwrap());
-    id_table.save_attr("mul_assign", STDENV.get("mul_assign").unwrap());
-    id_table.save_attr("not_equal", STDENV.get("not_equal").unwrap());
-    id_table.save_attr("right_shift", STDENV.get("right_shift").unwrap());
+    id_table.save_attr("mod", DeclOrId::Decl(STDENV.get("mod").unwrap().clone()));
+    id_table.save_attr(
+        "mod_assign",
+        DeclOrId::Decl(STDENV.get("mod_assign").unwrap().clone()),
+    );
+    id_table.save_attr("mul", DeclOrId::Decl(STDENV.get("mul").unwrap().clone()));
+    id_table.save_attr(
+        "mul_assign",
+        DeclOrId::Decl(STDENV.get("mul_assign").unwrap().clone()),
+    );
+    id_table.save_attr(
+        "not_equal",
+        DeclOrId::Decl(STDENV.get("not_equal").unwrap().clone()),
+    );
+    id_table.save_attr(
+        "right_shift",
+        DeclOrId::Decl(STDENV.get("right_shift").unwrap().clone()),
+    );
     id_table.save_attr(
         "right_shift_assign",
-        STDENV.get("right_shift_assign").unwrap(),
+        DeclOrId::Decl(STDENV.get("right_shift_assign").unwrap().clone()),
     );
-    id_table.save_attr("sub", STDENV.get("sub").unwrap());
-    id_table.save_attr("sub_assign", STDENV.get("sub_assign").unwrap());
+    id_table.save_attr("sub", DeclOrId::Decl(STDENV.get("sub").unwrap().clone()));
+    id_table.save_attr(
+        "sub_assign",
+        DeclOrId::Decl(STDENV.get("sub_assign").unwrap().clone().clone()),
+    );
 }

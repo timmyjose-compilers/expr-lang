@@ -1,14 +1,20 @@
-use crate::front::ast::Decl;
+use crate::front::ast::*;
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Debug)]
-pub struct IdentificationTable<'i> {
-    pub level: isize,
-    pub id_table: HashMap<isize, HashMap<String, &'i Decl>>,
+#[derive(Debug, Clone)]
+pub enum DeclOrId {
+    Decl(Decl),
+    Id(Identifier),
 }
 
-impl<'i> IdentificationTable<'i> {
+#[derive(Debug)]
+pub struct IdentificationTable {
+    pub level: isize,
+    pub id_table: HashMap<isize, HashMap<String, DeclOrId>>,
+}
+
+impl IdentificationTable {
     pub fn new() -> Self {
         let mut id_table = HashMap::new();
         id_table.insert(0isize, HashMap::new());
@@ -16,14 +22,14 @@ impl<'i> IdentificationTable<'i> {
         IdentificationTable { level: 0, id_table }
     }
 
-    pub fn save_attr(&mut self, id: &str, attr: &'i Decl) {
+    pub fn save_attr(&mut self, id: &str, attr: DeclOrId) {
         self.id_table
             .get_mut(&self.level)
             .unwrap()
             .insert(id.to_owned(), attr);
     }
 
-    pub fn get_attr(&self, search_id: &str) -> Option<&Decl> {
+    pub fn get_attr(&self, search_id: &str) -> Option<&DeclOrId> {
         let mut level = self.level;
 
         while level >= 0 {
@@ -50,7 +56,7 @@ impl<'i> IdentificationTable<'i> {
     }
 }
 
-impl fmt::Display for IdentificationTable<'_> {
+impl fmt::Display for IdentificationTable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut level = self.level;
 

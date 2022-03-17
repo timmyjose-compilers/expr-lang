@@ -80,7 +80,7 @@ impl BinaryExpr {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Identifier {
     pub spelling: String,
     pub typ: Option<Type>,
@@ -147,25 +147,26 @@ pub enum Type {
     IntType,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Decl {
     ConstDecl(ConstDecl),
     OperatorDecl(OperatorDecl),
+    IdDecl(),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ConstDecl {
     IntegerLiteral(i32),
     BoolLiteral(bool),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum OperatorDecl {
     UnaryOperatorDecl(UnaryOperatorDecl),
     BinaryOperatorDecl(BinaryOperatorDecl),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct UnaryOperatorDecl {
     pub elem_typ: Type,
     pub ret_typ: Type,
@@ -177,7 +178,7 @@ impl UnaryOperatorDecl {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BinaryOperatorDecl {
     pub lhs_typ: Type,
     pub rhs_typ: Type,

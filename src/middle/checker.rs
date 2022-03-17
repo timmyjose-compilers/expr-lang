@@ -1,17 +1,15 @@
-use super::id_table::IdentificationTable;
+use super::id_table::{DeclOrId, IdentificationTable};
 use super::stdenv::{self};
 use super::visitor::VisitorMut;
 use crate::error::report_error;
 use crate::error::*;
 use crate::front::ast::*;
-use std::any::Any;
-use std::rc::Rc;
 
-pub struct Checker<'c> {
-    id_table: IdentificationTable<'c>,
+pub struct Checker {
+    id_table: IdentificationTable,
 }
 
-impl<'c> Checker<'c> {
+impl Checker {
     pub fn new() -> Self {
         let mut id_table = IdentificationTable::new();
         stdenv::load_stdenv(&mut id_table);
@@ -19,141 +17,20 @@ impl<'c> Checker<'c> {
     }
 
     pub fn check(&mut self, ast: SharedPtr<Ast>) {
-        self.visit_ast(Rc::clone(&ast));
-    }
-}
-
-impl VisitorMut for Checker<'_> {
-    type Result = Option<Type>;
-
-    /// Type-check ast:
-    /// - type-check all the expts in the ast.
-    fn visit_ast(&mut self, ast: SharedPtr<Ast>) -> Self::Result {
-        for expr in &mut ast.borrow_mut().exprs {
-            self.visit_expr(expr)?;
-        }
-
-        None
+        self.visit_ast(ast);
     }
 
-    /// Type-check expr:
-    /// - dispatch type-checking according to the kind of expr
-    fn visit_expr(&mut self, expr: &mut Expr) -> Self::Result {
-        let _ = match expr {
-            Expr::PrintExpr(ref mut print_expr) => self.visit_print_expr(print_expr),
-            Expr::VnameExpr(ref mut vname_expr) => self.visit_vname_expr(vname_expr),
-            Expr::IntegerExpr(ref mut int_expr) => self.visit_integer_expr(int_expr),
-            Expr::BoolExpr(ref mut bool_expr) => self.visit_bool_expr(bool_expr),
-            Expr::UnaryExpr(ref mut un_expr) => self.visit_unary_expr(un_expr),
-            Expr::AssignExpr(ref mut ass_expr) => self.visit_assign_expr(ass_expr),
-            Expr::BinaryExpr(ref mut bin_expr) => self.visit_binary_expr(bin_expr),
-        };
-
-        None
-    }
-
-    /// Type-check print expr:
-    /// - type-check the expr
-    fn visit_print_expr(&mut self, print_expr: &mut Expr) -> Self::Result {
-        self.visit_expr(print_expr)
-    }
-
-    /// Type-check vname expr;
-    fn visit_vname_expr(&mut self, id: &mut Identifier) -> Self::Result {
-        todo!()
-    }
-
-    /// Type-check integer expr:
-    fn visit_integer_expr(&mut self, _int_expr: &mut i32) -> Self::Result {
-        Some(Type::IntType)
-    }
-
-    /// Type-check bool expr:
-    fn visit_bool_expr(&mut self, _bool_expr: &mut bool) -> Self::Result {
-        Some(Type::BoolType)
-    }
-
-    /// Type-check unary expr:
-    /// - get the spec for the operator from the id table
-    /// - get the type of the unary expr post typechecking
-    /// - validate that the types are the same.
-    fn visit_unary_expr(&mut self, un_expr: &mut UnaryExpr) -> Self::Result {
-        let elem_typ = self.visit_expr(&mut un_expr.elem);
-        if elem_typ.is_none() {
-            report_error(
-                ExprError::new(
-                    ExprErrorKind::CheckerError,
-                    format!("for unary expr, elem type is unavailable"),
-                ),
-                None,
-            );
-        }
-
-        let elem_typ = elem_typ.unwrap();
-
-        let op_spec = match un_expr.op {
+    fn get_unary_op_spec(&self, op: &UnaryOperator) -> &DeclOrId {
+        match *op {
             UnaryOperator::BitwiseNot => self.id_table.get_attr("bitwise_not").unwrap(),
             UnaryOperator::LogicalNot => self.id_table.get_attr("logical_not").unwrap(),
             UnaryOperator::UnaryMinus => self.id_table.get_attr("unary_minus").unwrap(),
             UnaryOperator::UnaryPlus => self.id_table.get_attr("unary_plus").unwrap(),
-        };
-
-        let op_spec = <dyn Any>::downcast_ref::<UnaryOperatorDecl>(op_spec).unwrap();
-
-        if op_spec.elem_typ != elem_typ {
-            report_error(ExprError::new(ExprErrorKind::CheckerError, format!("unary expression elem type ({:?}) does not match the expected elem type ({:?}) for operator", 
-                        elem_typ, op_spec.elem_typ)), None);
         }
-
-        un_expr.typ = Some(op_spec.ret_typ.clone());
-        un_expr.typ.clone()
     }
 
-    /// Type-check assignment expr:
-    /// - type-check vname and get id.
-    /// - type-check rhs expr and get type.
-    /// - get spec for assignment operation.
-    /// - validate types
-    /// - decorate identifier with type (if not set), and if already set,
-    /// verify that the type has not changed.
-    fn visit_assign_expr(&mut self, ass_expr: &mut AssignExpr) -> Self::Result {
-        todo!()
-    }
-
-    /// Type-check binary expr:
-    /// - get the spec for the binary operator
-    /// - type-check the lhs
-    /// - type-check the rhs
-    /// - validate types against spec
-    /// - set the spec return type as the type of the expr
-    fn visit_binary_expr(&mut self, bin_expr: &mut BinaryExpr) -> Self::Result {
-        let lhs_typ = self.visit_expr(&mut bin_expr.lhs);
-        if lhs_typ.is_none() {
-            report_error(
-                ExprError::new(
-                    ExprErrorKind::CheckerError,
-                    format!("for bin expr, lhs type is unavailable"),
-                ),
-                None,
-            );
-        }
-
-        let lhs_typ = lhs_typ.unwrap();
-
-        let rhs_typ = self.visit_expr(&mut bin_expr.rhs);
-        if rhs_typ.is_none() {
-            report_error(
-                ExprError::new(
-                    ExprErrorKind::CheckerError,
-                    format!("for bin expr, rhs type is unavailable"),
-                ),
-                None,
-            );
-        }
-
-        let rhs_typ = rhs_typ.unwrap();
-
-        let op_spec = match bin_expr.op {
+    fn get_bin_op_spec(&self, op: &BinaryOperator) -> &DeclOrId {
+        match *op {
             BinaryOperator::Add => self.id_table.get_attr("add").unwrap(),
             BinaryOperator::AddAssign => self.id_table.get_attr("add_assign").unwrap(),
             BinaryOperator::Assign => self.id_table.get_attr("assign").unwrap(),
@@ -197,25 +74,239 @@ impl VisitorMut for Checker<'_> {
             }
             BinaryOperator::Sub => self.id_table.get_attr("sub").unwrap(),
             BinaryOperator::SubAssign => self.id_table.get_attr("sub_assign").unwrap(),
-        };
+        }
+    }
+}
 
-        let op_spec = <dyn Any>::downcast_ref::<BinaryOperatorDecl>(op_spec).unwrap();
+impl VisitorMut for Checker {
+    type Result = Option<Type>;
 
-        if op_spec.lhs_typ == Type::AnyType && op_spec.rhs_typ == Type::AnyType {
-            if lhs_typ != rhs_typ {
-                report_error(ExprError::new(ExprErrorKind::CheckerError, format!("for bin expr, lhs type of lhs expr ({:?}) does not match the rhs expr type ({:?})", lhs_typ,
-            rhs_typ)), None);
-            }
-        } else if lhs_typ != op_spec.lhs_typ {
-            report_error(ExprError::new(ExprErrorKind::CheckerError, format!("for bin expr, lhs type of lhs expr ({:?}) does not match the spec's lhs type ({:?})", lhs_typ,
-            op_spec.lhs_typ)), None);
-        } else if rhs_typ != op_spec.rhs_typ {
-            report_error(ExprError::new(ExprErrorKind::CheckerError, format!("for bin expr, lhs type of rhs expr ({:?}) does not match the spec's rhs type ({:?})", rhs_typ,
-            op_spec.rhs_typ)), None);
+    /// Type-check ast:
+    /// - type-check all the expts in the ast.
+    fn visit_ast(&mut self, ast: SharedPtr<Ast>) -> Self::Result {
+        for expr in &mut ast.borrow_mut().exprs {
+            self.visit_expr(expr)?;
         }
 
-        bin_expr.typ = Some(op_spec.ret_typ.clone());
+        None
+    }
 
-        bin_expr.typ.clone()
+    /// Type-check expr:
+    /// - dispatch type-checking according to the kind of expr
+    fn visit_expr(&mut self, expr: &mut Expr) -> Self::Result {
+        match expr {
+            Expr::PrintExpr(ref mut print_expr) => self.visit_print_expr(print_expr),
+            Expr::VnameExpr(ref mut vname_expr) => self.visit_vname_expr(vname_expr),
+            Expr::IntegerExpr(ref mut int_expr) => self.visit_integer_expr(int_expr),
+            Expr::BoolExpr(ref mut bool_expr) => self.visit_bool_expr(bool_expr),
+            Expr::UnaryExpr(ref mut un_expr) => self.visit_unary_expr(un_expr),
+            Expr::AssignExpr(ref mut ass_expr) => self.visit_assign_expr(ass_expr),
+            Expr::BinaryExpr(ref mut bin_expr) => self.visit_binary_expr(bin_expr),
+        }
+    }
+
+    /// Type-check print expr:
+    /// - type-check the expr
+    fn visit_print_expr(&mut self, print_expr: &mut Expr) -> Self::Result {
+        self.visit_expr(print_expr)
+    }
+
+    /// Type-check vname expr;
+    /// - simply visit the identifier and return its type.
+    fn visit_vname_expr(&mut self, id: &mut Identifier) -> Self::Result {
+        self.visit_identifier(id)
+    }
+
+    /// Type-check integer expr:
+    fn visit_integer_expr(&mut self, _int_expr: &mut i32) -> Self::Result {
+        Some(Type::IntType)
+    }
+
+    /// Type-check bool expr:
+    fn visit_bool_expr(&mut self, _bool_expr: &mut bool) -> Self::Result {
+        Some(Type::BoolType)
+    }
+
+    /// Type-check an identifier:
+    /// - for now, simply return its type, if any.
+    fn visit_identifier(&mut self, id: &mut Identifier) -> Self::Result {
+        if let Some(DeclOrId::Id(ref id_decl)) = self.id_table.get_attr(&id.spelling) {
+            id.typ = id_decl.typ.clone();
+            id.typ.clone()
+        } else {
+            None
+        }
+    }
+
+    /// Type-check unary expr:
+    /// - get the spec for the operator from the id table
+    /// - get the type of the unary expr post typechecking
+    /// - validate that the types are the same.
+    fn visit_unary_expr(&mut self, un_expr: &mut UnaryExpr) -> Self::Result {
+        let elem_typ = self.visit_expr(&mut un_expr.elem);
+        if elem_typ.is_none() {
+            report_error(
+                ExprError::new(
+                    ExprErrorKind::CheckerError,
+                    format!("for unary expr, elem type is unavailable"),
+                ),
+                None,
+            );
+        }
+
+        let elem_typ = elem_typ.unwrap();
+        let op_spec = self.get_unary_op_spec(&un_expr.op);
+
+        if let DeclOrId::Decl(Decl::OperatorDecl(OperatorDecl::UnaryOperatorDecl(ref op_decl))) =
+            op_spec
+        {
+            if op_decl.elem_typ != elem_typ {
+                report_error(ExprError::new(ExprErrorKind::CheckerError, format!("unary expression elem type ({:?}) does not match the expected elem type ({:?}) for operator", 
+                        elem_typ, op_decl.elem_typ)), None);
+            }
+
+            un_expr.typ = Some(op_decl.ret_typ.clone());
+            un_expr.typ.clone()
+        } else {
+            report_error(
+                ExprError::new(
+                    ExprErrorKind::CheckerError,
+                    format!(
+                        "expected a unary operator in unary expression, but found {:?}",
+                        op_spec
+                    ),
+                ),
+                None,
+            );
+            None
+        }
+    }
+
+    /// Type-check assignment expr:
+    /// - type-check vname and get id.
+    /// - type-check rhs expr and get type.
+    /// - get spec for assignment operation.
+    /// - validate types
+    /// - decorate identifier with type (if not set), and if already set,
+    /// verify that the type has not changed.
+    fn visit_assign_expr(&mut self, ass_expr: &mut AssignExpr) -> Self::Result {
+        let lhs_typ = self.visit_expr(&mut ass_expr.vname);
+        let rhs_typ = self.visit_expr(&mut ass_expr.expr);
+
+        if rhs_typ.is_none() {
+            report_error(
+                ExprError::new(
+                    ExprErrorKind::CheckerError,
+                    format!("could not determine type of rhs of assignment expression"),
+                ),
+                None,
+            );
+        }
+
+        let op_spec = self.get_bin_op_spec(&ass_expr.op);
+        if let DeclOrId::Decl(Decl::OperatorDecl(OperatorDecl::BinaryOperatorDecl(ref _op_decl))) =
+            op_spec
+        {
+            if let Expr::VnameExpr(ref mut id) = *ass_expr.vname {
+                if id.typ.is_none() {
+                    id.typ = rhs_typ.clone();
+                    self.id_table
+                        .save_attr(&id.spelling, DeclOrId::Id(id.clone()));
+                } else if lhs_typ != rhs_typ {
+                    report_error(
+                        ExprError::new(
+                            ExprErrorKind::CheckerError,
+                            format!(
+                                "id {:?} has inferred type {:?}, but rhs has type {:?}",
+                                id.spelling, id.typ, rhs_typ
+                            ),
+                        ),
+                        None,
+                    );
+                    return None;
+                }
+                ass_expr.typ = rhs_typ.clone();
+                ass_expr.typ.clone()
+            } else {
+                report_error(
+                    ExprError::new(
+                        ExprErrorKind::CheckerError,
+                        format!("the lhs of an assignment expression must be a vname"),
+                    ),
+                    None,
+                );
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Type-check binary expr:
+    /// - get the spec for the binary operator
+    /// - type-check the lhs
+    /// - type-check the rhs
+    /// - validate types against spec
+    /// - set the spec return type as the type of the expr
+    fn visit_binary_expr(&mut self, bin_expr: &mut BinaryExpr) -> Self::Result {
+        let lhs_typ = self.visit_expr(&mut bin_expr.lhs);
+        if lhs_typ.is_none() {
+            report_error(
+                ExprError::new(
+                    ExprErrorKind::CheckerError,
+                    format!("for bin expr, lhs type is unavailable"),
+                ),
+                None,
+            );
+        }
+
+        let lhs_typ = lhs_typ.unwrap();
+
+        let rhs_typ = self.visit_expr(&mut bin_expr.rhs);
+        if rhs_typ.is_none() {
+            report_error(
+                ExprError::new(
+                    ExprErrorKind::CheckerError,
+                    format!("for bin expr, rhs type is unavailable"),
+                ),
+                None,
+            );
+        }
+
+        let rhs_typ = rhs_typ.unwrap();
+        let op_spec = self.get_bin_op_spec(&bin_expr.op);
+
+        if let DeclOrId::Decl(Decl::OperatorDecl(OperatorDecl::BinaryOperatorDecl(ref op_decl))) =
+            op_spec
+        {
+            if op_decl.lhs_typ == Type::AnyType && op_decl.rhs_typ == Type::AnyType {
+                if lhs_typ != rhs_typ {
+                    report_error(ExprError::new(ExprErrorKind::CheckerError, format!("for bin expr, lhs type of lhs expr ({:?}) does not match the rhs expr type ({:?})", lhs_typ,
+            rhs_typ)), None);
+                }
+            } else if lhs_typ != op_decl.lhs_typ {
+                report_error(ExprError::new(ExprErrorKind::CheckerError, format!("for bin expr, lhs type of lhs expr ({:?}) does not match the spec's lhs type ({:?})", lhs_typ,
+            op_decl.lhs_typ)), None);
+            } else if rhs_typ != op_decl.rhs_typ {
+                report_error(ExprError::new(ExprErrorKind::CheckerError, format!("for bin expr, lhs type of rhs expr ({:?}) does not match the spec's rhs type ({:?})", rhs_typ,
+            op_decl.rhs_typ)), None);
+            }
+
+            bin_expr.typ = Some(op_decl.ret_typ.clone());
+            bin_expr.typ.clone()
+        } else {
+            report_error(
+                ExprError::new(
+                    ExprErrorKind::CheckerError,
+                    format!(
+                        "expected a binary operator in binary expression, but found {:?}",
+                        op_spec
+                    ),
+                ),
+                None,
+            );
+
+            None
+        }
     }
 }

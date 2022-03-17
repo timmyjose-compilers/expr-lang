@@ -1,12 +1,15 @@
+use std::rc::Rc;
+
 mod common;
 
 use std::io;
 use std::path::PathBuf;
 
 use expr_lang::front::{parser::Parser, scanner::Scanner, source_file::SourceFile};
+use expr_lang::middle::checker::Checker;
 
 #[test]
-fn all_parser_tests() -> io::Result<()> {
+fn all_cheker_tests() -> io::Result<()> {
     let mut test_files = Vec::new();
     common::get_all_test_files(&"examples", &mut test_files)?;
 
@@ -22,5 +25,7 @@ fn run_test(test_file: PathBuf) {
     scanner.scan_all();
     let mut parser = Parser::new(scanner.tokens);
     let ast = parser.parse();
+    let mut checker = Checker::new();
+    checker.check(Rc::clone(&ast));
     println!("{:#?}", ast);
 }
