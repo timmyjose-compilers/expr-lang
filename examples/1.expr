@@ -1,6 +1,6 @@
-a = 1 + 2 * 3 // 7
-print(a)
-b = 10 // 10
-print(b)
-c = a % b // 7
+a = 1 + 2 * 3 
+print(a) // 7
+b = 10 
+print(b) // 10
+c = a % b 
 print(a + b + c) // 24

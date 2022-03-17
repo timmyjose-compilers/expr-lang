@@ -1,0 +1,9 @@
+print(false && false) // false
+print(false && true) // false
+print(true && false) // false
+print(true && true) // true
+
+print(false || false) // false
+print(false || true) // true
+print(true || false) // true
+print(true || true) // true

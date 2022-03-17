@@ -32,51 +32,86 @@ impl VisitorMut for Interpreter {
 
         if let Expr::VnameExpr(ref vname_expr) = *ass_expr.vname {
             match ass_expr.op {
-                BinaryOperator::Assign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_val.clone()),
-                BinaryOperator::AddAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val + var_val.clone()),
+                BinaryOperator::Assign => {
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, var_val.clone());
+                    var_val
+                }
 
-                BinaryOperator::SubAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val - var_val.clone()),
-                BinaryOperator::MulAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val * var_val.clone()),
-                BinaryOperator::DivAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val / var_val.clone()),
+                BinaryOperator::AddAssign => {
+                    let sum_val = var_name_val + var_val;
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, sum_val.clone());
+                    sum_val
+                }
 
-                BinaryOperator::ModAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val % var_val.clone()),
+                BinaryOperator::SubAssign => {
+                    let sub_val = var_name_val.clone() - var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, sub_val.clone());
+                    sub_val
+                }
 
-                BinaryOperator::BitwiseAndAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val & var_val.clone()),
+                BinaryOperator::MulAssign => {
+                    let mul_val = var_name_val.clone() * var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, mul_val.clone());
+                    mul_val
+                }
 
-                BinaryOperator::BitwiseOrAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val | var_val.clone()),
-                BinaryOperator::BitwiseXorAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val ^ var_val.clone()),
-                BinaryOperator::LeftShiftAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val << var_val.clone()),
+                BinaryOperator::DivAssign => {
+                    let div_val = var_name_val.clone() / var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, div_val.clone());
+                    div_val
+                }
 
-                BinaryOperator::RightShiftAssign => self
-                    .runtime
-                    .save_binding(&vname_expr.id.spelling, var_name_val >> var_val.clone()),
+                BinaryOperator::ModAssign => {
+                    let mod_val = var_name_val.clone() % var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, mod_val.clone());
+                    mod_val
+                }
+
+                BinaryOperator::BitwiseAndAssign => {
+                    let bitand_val = var_name_val.clone() & var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, bitand_val.clone());
+                    bitand_val
+                }
+
+                BinaryOperator::BitwiseOrAssign => {
+                    let bitor_val = var_name_val.clone() | var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, bitor_val.clone());
+                    bitor_val
+                }
+                BinaryOperator::BitwiseXorAssign => {
+                    let bitxor_val = var_name_val.clone() ^ var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, bitxor_val.clone());
+                    bitxor_val
+                }
+
+                BinaryOperator::LeftShiftAssign => {
+                    let shl_val = var_name_val.clone() + var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, shl_val.clone());
+                    shl_val
+                }
+
+                BinaryOperator::RightShiftAssign => {
+                    let shr_val = var_name_val.clone() >> var_val.clone();
+                    self.runtime
+                        .save_binding(&vname_expr.id.spelling, shr_val.clone());
+                    shr_val
+                }
 
                 _ => unreachable!(),
             }
-            self.runtime
-                .save_binding(&vname_expr.id.spelling, var_val.clone());
+        } else {
+            ExprValue::None
         }
-        var_val
     }
 
     fn visit_ast(&mut self, ast: SharedPtr<Ast>) -> Self::Result {
@@ -119,7 +154,7 @@ impl VisitorMut for Interpreter {
             BinaryOperator::LogicalOr => {
                 if let ExprValue::Bool(lhs_val) = lhs_val {
                     if let ExprValue::Bool(rhs_val) = rhs_val {
-                        ExprValue::Bool(lhs_val && rhs_val)
+                        ExprValue::Bool(lhs_val || rhs_val)
                     } else {
                         ExprValue::None
                     }

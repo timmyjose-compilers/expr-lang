@@ -1,8 +1,20 @@
-a = 1 // 1
-a = 2 // 2
-a = 3 // 3
-a += 100 // 103
-b = 20 // 20
-c = 1 // 1
-c *= (a + b) * c / 10 // 2
-print(c) // 2
+a = 1 
+print(a) // 1
+a = 2 
+print(a) // 2
+a = 3 
+print(a) // 3
+a += 100 
+print(a) // 103
+a -= 20 
+print(a) // 83
+a += 20
+print(a) // 103
+b = 20 
+c = 1 
+print(a + b) // 123
+print((a + b)) // 123
+print((a + b) * c) // 123
+print((a + b) * c / 10) // 12
+c *= (a + b) * c / 10
+print(c) // 12

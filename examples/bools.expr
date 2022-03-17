@@ -1,2 +1,6 @@
 a = true
+print(a) // true
+print(false && true) // false
+print(false || (false && true)) // false
+print((false && true) || true) // true
 print(false || (false && true) || a)

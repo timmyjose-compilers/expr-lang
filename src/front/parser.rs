@@ -62,7 +62,6 @@ impl Parser {
         match kind {
             TokenKind::LogicalNot
             | TokenKind::BitwiseNot
-            | TokenKind::Star
             | TokenKind::Assign
             | TokenKind::PlusAssign
             | TokenKind::MinusAssign
