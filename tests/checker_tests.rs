@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 mod common;
 
 use std::io;
@@ -24,8 +22,8 @@ fn run_test(test_file: PathBuf) {
     let mut scanner = Scanner::new(SourceFile::new(test_file).chars);
     scanner.scan_all();
     let mut parser = Parser::new(scanner.tokens);
-    let ast = parser.parse();
+    let mut ast = parser.parse();
     let mut checker = Checker::new();
-    checker.check(Rc::clone(&ast));
+    checker.check(&mut ast);
     println!("{:#?}", ast);
 }

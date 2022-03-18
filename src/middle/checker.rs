@@ -16,7 +16,7 @@ impl Checker {
         Checker { id_table }
     }
 
-    pub fn check(&mut self, ast: SharedPtr<Ast>) {
+    pub fn check(&mut self, ast: &mut Ast) {
         self.visit_ast(ast);
     }
 
@@ -83,8 +83,8 @@ impl VisitorMut for Checker {
 
     /// Type-check ast:
     /// - type-check all the expts in the ast.
-    fn visit_ast(&mut self, ast: SharedPtr<Ast>) -> Self::Result {
-        for expr in &mut ast.borrow_mut().exprs {
+    fn visit_ast(&mut self, ast: &mut Ast) -> Self::Result {
+        for expr in &mut ast.exprs {
             self.visit_expr(expr)?;
         }
 

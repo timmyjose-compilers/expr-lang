@@ -13,7 +13,7 @@ impl Interpreter {
         }
     }
 
-    pub fn interpret(&mut self, ast: SharedPtr<Ast>) {
+    pub fn interpret(&mut self, ast: &mut Ast) {
         match self.visit_ast(ast) {
             ExprValue::Int(ival) => println!("{}", ival),
             ExprValue::Float(fval) => println!("{}", fval),
@@ -114,10 +114,10 @@ impl VisitorMut for Interpreter {
         }
     }
 
-    fn visit_ast(&mut self, ast: SharedPtr<Ast>) -> Self::Result {
+    fn visit_ast(&mut self, ast: &mut Ast) -> Self::Result {
         let mut resp = ExprValue::None;
 
-        for expr in &mut ast.borrow_mut().exprs {
+        for expr in &mut ast.exprs {
             resp = self.visit_expr(expr);
         }
 

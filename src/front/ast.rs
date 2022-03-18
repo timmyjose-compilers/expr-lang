@@ -1,8 +1,3 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
-pub type SharedPtr<T> = Rc<RefCell<T>>;
-
 #[derive(Debug)]
 pub struct Ast {
     pub exprs: Vec<Expr>,

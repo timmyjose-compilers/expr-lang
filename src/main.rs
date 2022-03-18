@@ -1,7 +1,6 @@
 use expr_lang::backend::interpreter::Interpreter;
 use expr_lang::front::{parser::Parser, scanner::Scanner, source_file::SourceFile};
 use expr_lang::middle::checker::Checker;
-use std::rc::Rc;
 
 use std::env;
 
@@ -10,7 +9,7 @@ fn main() {
 
     let args = env::args().skip(1).collect::<Vec<String>>();
     if args.len() != 1 {
-        usage();
+        run_repl();
     }
 
     let source_file_path = &args[0];
@@ -24,18 +23,20 @@ fn main() {
     }
 
     let mut parser = Parser::new(scanner.tokens);
-    let ast = parser.parse();
+    let mut ast = parser.parse();
     println!("{:#?}", ast);
 
     let mut checker = Checker::new();
-    checker.check(Rc::clone(&ast));
+    checker.check(&mut ast);
     println!("{:#?}", ast);
 
     let mut interpreter = Interpreter::new();
-    interpreter.interpret(Rc::clone(&ast));
+    interpreter.interpret(&mut ast);
 }
 
-fn usage() {
-    eprintln!("USAGE: expr <source-file>");
-    std::process::exit(1);
+fn run_repl() {
+    loop {
+        println!("> ");
+        todo!()
+    }
 }

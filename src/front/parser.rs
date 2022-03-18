@@ -1,8 +1,6 @@
 use super::ast::*;
 use super::token::{Token, TokenKind};
 use crate::error::{report_error, ExprError, ExprErrorKind};
-use std::cell::RefCell;
-use std::rc::Rc;
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -200,13 +198,13 @@ impl Parser {
     }
 
     /// Ast ::= Expr* Eof
-    pub fn parse(&mut self) -> SharedPtr<Ast> {
+    pub fn parse(&mut self) -> Ast {
         let mut exprs = Vec::new();
 
         while self.curr_token().kind != TokenKind::Eof {
             exprs.push(self.parse_expression(Parser::MIN_BINDING_POWER));
         }
 
-        Rc::new(RefCell::new(Ast::new(exprs)))
+        Ast::new(exprs)
     }
 }
